@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+
+# Local SQLite databases and sidecar files
+*.db
+*.db-shm
+*.db-wal
+
+# IDE and local tooling files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS-generated files
+.DS_Store
+Thumbs.db
