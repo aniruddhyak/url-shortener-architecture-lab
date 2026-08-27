@@ -1,6 +1,6 @@
 # How to Start the Application
 
-This solution is a .NET 9 ASP.NET Core Web API using EF Core and SQLite. The selectable hosts are `src\FullHost` and `src\SearchHost`.
+This solution is a .NET 9 ASP.NET Core Web API using EF Core and PostgreSQL. The selectable hosts are `src\FullHost` and `src\SearchHost`.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ Restore dependencies:
 dotnet restore
 ```
 
-Apply the EF Core migration to create the SQLite schema:
+Ensure PostgreSQL is running and apply the EF Core migration:
 
 ```powershell
 dotnet ef database update --project .\src\UrlShortener.Web\UrlShortener.Web.csproj
@@ -107,21 +107,17 @@ Ctrl+C
 
 ## Troubleshooting
 
-If the API returns:
+If the API cannot connect to PostgreSQL, verify that PostgreSQL is running and that the `DefaultConnection` value is correct. The connection string can be overridden without changing source files:
 
-```text
-SQLite Error 1: 'no such table: UrlEntries'
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Host=localhost;Port=5432;Database=urlshortener;Username=postgres;Password=your-local-password"
 ```
 
-Stop the API, apply the migration, and start it again:
+If the API reports a missing table, apply the migration:
 
 ```powershell
 dotnet ef database update
 dotnet run
 ```
 
-The SQLite database is stored in the project folder as:
-
-```text
-urlshortener.db
-```
+The PostgreSQL database is not stored in the repository. Its connection details should be supplied through environment variables or local user secrets.

@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
     <ProjectReference Include="..\UrlShortener.Modules.Search\UrlShortener.Modules.Search.csproj" />
   </ItemGroup>
 </Project>

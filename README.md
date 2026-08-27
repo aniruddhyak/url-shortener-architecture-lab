@@ -3,7 +3,7 @@
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-9.0-512BD4?logo=dotnet&logoColor=white)](https://learn.microsoft.com/aspnet/core)
 [![EF Core](https://img.shields.io/badge/EF%20Core-9.0-512BD4?logo=dotnet&logoColor=white)](https://learn.microsoft.com/ef/core/)
-[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Learning-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
 A hands-on software architecture and platform engineering lab that progressively evolves a simple URL shortener into a production-oriented, cloud-native system.
@@ -76,7 +76,7 @@ One solution
     +-- Multiple module assemblies
     +-- Multiple optional hosts
     +-- One process per running host
-    +-- One SQLite database
+    +-- One PostgreSQL database
 ```
 
 `FullHost` exposes the complete API. `SearchHost` selectively exposes only the search controller using ASP.NET Core Application Parts. Both hosts reuse the same module assemblies and remain part of the same monolithic solution.
@@ -88,12 +88,12 @@ One solution
 | Runtime | .NET 9 |
 | Web framework | ASP.NET Core Web API |
 | Persistence | Entity Framework Core |
-| Local database | SQLite |
+| Database | PostgreSQL |
 | API documentation | Swagger / OpenAPI |
 | Modular composition | .NET assemblies and Application Parts |
 | Containers | Docker (Phase 5 in progress) |
 | Orchestration | Kubernetes (planned) |
-| Future database | PostgreSQL (planned) |
+| Local database | PostgreSQL |
 
 ## Current Capabilities
 
@@ -103,7 +103,7 @@ One solution
 - Run a full API host.
 - Run a search-only host.
 - Select controller assemblies per host.
-- Preserve one shared EF Core model and SQLite database.
+- Preserve one shared EF Core model and PostgreSQL database.
 - Demonstrate dependency inversion through a Search-owned repository abstraction.
 
 ### API Endpoints
@@ -141,7 +141,7 @@ One solution
                                              v
                               +-----------------------------+
                               | Shared Web Data             |
-                              | AppDbContext -> SQLite      |
+                              | AppDbContext -> PostgreSQL  |
                               +-----------------------------+
 ```
 
@@ -171,7 +171,7 @@ One solution
 +-----------------------------+
 | Urls Repository             |
 | Shared AppDbContext         |
-| SQLite                      |
+| PostgreSQL                 |
 +-----------------------------+
 ```
 
@@ -191,7 +191,7 @@ Urls Module - UrlRepository
         AppDbContext
               |
               v
-            SQLite
+            PostgreSQL
 ```
 
 The Search module owns the abstraction it consumes. The URL module provides the implementation. This improves ownership and dependency direction without pretending the modules are already independently deployable.
@@ -234,7 +234,7 @@ UrlShortenerArchitectureLab.sln
         +-- UrlShortener.Web.csproj
 ```
 
-The Web project owns EF Core, migrations, SQLite configuration, and shared host infrastructure. The module assemblies own business capabilities and controllers. The hosts decide which controllers are composed into a running application.
+The Web project owns EF Core, migrations, PostgreSQL configuration, and shared host infrastructure. The module assemblies own business capabilities and controllers. The hosts decide which controllers are composed into a running application.
 
 ## Request Flow
 
@@ -247,7 +247,7 @@ HTTP request
     -> IUrlService / UrlService
     -> IUrlRepository / UrlRepository
     -> AppDbContext
-    -> SQLite
+    -> PostgreSQL
     -> HTTP response
 ```
 
@@ -260,7 +260,7 @@ HTTP request
     -> ISearchRepository
     -> UrlRepository implementation
     -> AppDbContext
-    -> SQLite
+    -> PostgreSQL
     -> search response
 ```
 
@@ -351,7 +351,7 @@ Key questions this phase explores:
 
 - Which host should be containerized?
 - Should `FullHost` and `SearchHost` be separate images or one image with different commands?
-- How should SQLite storage be mounted and persisted?
+- How should PostgreSQL storage be provisioned and persisted?
 - Which configuration belongs in environment variables?
 - What should the container health check verify?
 - How do image size, startup time, and non-root execution affect production readiness?
@@ -385,7 +385,7 @@ The Kubernetes phase will intentionally address operational concerns in sequence
 3. Add readiness and liveness probes.
 4. Add Services and ingress routing.
 5. Evaluate replicas and stateful database requirements.
-6. Replace SQLite with PostgreSQL when horizontal scaling requires it.
+6. Evaluate PostgreSQL storage and horizontal scaling requirements.
 
 ## Architecture Evolution
 
@@ -394,7 +394,7 @@ The Kubernetes phase will intentionally address operational concerns in sequence
 One ASP.NET Core project with a straightforward flow:
 
 ```text
-Controller -> Service -> Repository -> EF Core -> SQLite
+Controller -> Service -> Repository -> EF Core -> PostgreSQL
 ```
 
 ### Phase 2: Folder-Based Modular Monolith
@@ -428,7 +428,7 @@ Containerization, orchestration, database migration, scaling, routing, and obser
 | 5 | Dockerization | 🚧 In Progress |
 | 6 | Docker Compose | 📋 Planned |
 | 7 | Kubernetes Deployment | 📋 Planned |
-| 8 | PostgreSQL Migration | 📋 Planned |
+| 8 | PostgreSQL Migration | ✅ Completed |
 | 9 | Horizontal Scaling and Ingress Routing | 📋 Planned |
 | 10 | Observability and Production Readiness | 📋 Planned |
 
@@ -436,7 +436,7 @@ Containerization, orchestration, database migration, scaling, routing, and obser
 
 - Add Dockerfiles for the selected hosts.
 - Add Docker Compose for repeatable local multi-host execution.
-- Introduce PostgreSQL when shared SQLite storage becomes a scaling constraint.
+- Tune PostgreSQL schema, pooling, backups, and operational policies.
 - Add Kubernetes manifests or Helm-based deployment configuration.
 - Add ingress routing and host-specific traffic policies.
 - Add structured logging, metrics, distributed tracing, and health checks.
@@ -453,4 +453,3 @@ Containerization, orchestration, database migration, scaling, routing, and obser
 - Separate module ownership from runtime deployment.
 - Make state, scaling, and operational trade-offs visible.
 - Introduce infrastructure when it solves a demonstrated problem.
-
