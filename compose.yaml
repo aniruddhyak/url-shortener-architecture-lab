@@ -30,5 +30,19 @@ services:
       postgres:
         condition: service_healthy
 
+  searchhost:
+    build:
+      context: .
+      dockerfile: Dockerfile.searchhost
+    container_name: url-shortener-searchhost
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=urlshortener;Username=postgres;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD before starting Compose}"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres-data:
